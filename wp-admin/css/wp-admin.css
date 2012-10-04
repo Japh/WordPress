@@ -719,12 +719,9 @@ h2 .nav-tab,
 }
 
 .pre {
-	/* http://www.longren.org/2006/09/27/wrapping-text-inside-pre-tags/ */
+	/* https://developer.mozilla.org/en-US/docs/CSS/white-space */
 	white-space: pre-wrap; /* css-3 */
-	white-space: -moz-pre-wrap !important; /* Mozilla, since 1999 */
-	white-space: -pre-wrap; /* Opera 4-6 */
-	white-space: -o-pre-wrap; /* Opera 7 */
-	word-wrap: break-word; /* Internet Explorer 5.5+ */
+	word-wrap: break-word; /* IE 5.5 - 7 */
 }
 
 .howto {
@@ -968,6 +965,10 @@ ul#add-to-blog-users {
 	line-height: 23px;
 }
 
+#publishing-action .spinner {
+	float: left;
+}
+
 #misc-publishing-actions {
 	padding: 6px 0 0;
 }
@@ -1099,7 +1100,6 @@ form.upgrade .hint {
 }
 
 .ajax-feedback {
-	visibility: hidden;
 	vertical-align: bottom;
 }
 
@@ -1370,7 +1370,7 @@ form.upgrade .hint {
 	position: absolute;
 	top: -1000em;
 	left: 146px;
-	z-index: 999;
+	z-index: 1000;
 	overflow: visible;
 	border-width: 1px;
 	border-style: solid;
@@ -2176,24 +2176,32 @@ html.wp-toolbar {
 
 /* Welcome Panel */
 .welcome-panel {
-	margin: 20px 8px;
-	padding: 30px 10px 20px;
-	border-width: 1px 0;
-	border-style: solid;
 	position: relative;
-	line-height: 1.6em;
 	overflow: auto;
+	margin: 20px 0;
+	padding: 23px 10px 12px;
+	border-width: 1px;
+	border-style: solid;
+	border-radius: 3px;
+	font-size: 13px;
+	line-height: 1.6em;
 }
 
 .welcome-panel h3 {
+	margin: 0;
 	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", sans-serif;
 	font-size: 32px;
 	font-weight: normal;
 	line-height: 1.2;
-	margin: 0.1em 0 0.8em;
 }
 .welcome-panel h4 {
-	font-size: 14px;
+	margin: 1.33em 0 0;
+	font-size: 13px;
+}
+
+.welcome-panel .about-description {
+	font-size: 18px;
+	margin: 0;
 }
 
 .welcome-panel .welcome-panel-close {
@@ -2206,50 +2214,43 @@ html.wp-toolbar {
 }
 
 .welcome-panel .welcome-panel-close:before {
-	background: url('../images/xit.gif') 0 17% no-repeat;
 	content: ' ';
-	height: 100%;
-	width: 10px;
-	left: -12px;
 	position: absolute;
+	left: -12px;
+	width: 10px;
+	height: 100%;
+	background: url('../images/xit.gif') 0 17% no-repeat;
 }
 
 .welcome-panel .welcome-panel-close:hover:before {
 	background-position: 100% 17%;
 }
 
-.welcome-panel .wp-badge {
-	float: left;
-	margin-bottom: 20px;
+.welcome-button {
+	margin: -9px 0 3px;
+	padding: 1em 3em;
+	font: normal 15px/1 sans-serif;
 }
 
 .welcome-panel-content {
+	margin-left: 13px;
 	max-width: 1500px;
-}
-
-.welcome-panel-content .about-description,
-.welcome-panel h3 {
-	margin-left: 190px;
-}
-
-.welcome-panel p.welcome-panel-dismiss {
-	clear: both;
-	padding: 1em 0 0 0;
 }
 
 .welcome-panel .welcome-panel-column-container {
 	clear: both;
 	overflow: hidden;
 	position: relative;
-	padding-left: 26px;
 }
 
 .welcome-panel .welcome-panel-column {
-	margin: 0 5% 0 -25px;
-	padding-left: 25px;
-	width: 30%;
+	width: 32%;
 	min-width: 200px;
 	float: left;
+}
+
+.welcome-panel .welcome-panel-column:first-child {
+	width: 36%;
 }
 
 .welcome-panel .welcome-panel-column.welcome-panel-last {
@@ -2260,8 +2261,12 @@ html.wp-toolbar {
 	margin-left: -32px;
 }
 
+.welcome-panel-column p {
+	margin-top: 5px;
+}
+
 .welcome-panel .welcome-panel-column ul {
-	margin: 1.6em 1em 1em 1.3em;
+	margin: 0.4em 1em 1em 1.3em;
 }
 
 .welcome-panel .welcome-panel-column li {
@@ -2269,6 +2274,38 @@ html.wp-toolbar {
 	padding-left: 2px;
 }
 
+@media screen and (max-width: 870px) {
+	.welcome-button {
+		font-size: 14px;
+		padding: 1em 2.3em;
+	}
+
+	.welcome-panel .welcome-panel-column, .welcome-panel .welcome-panel-column:first-child {
+		display: block;
+		float: none;
+		width: 100%;
+	}
+
+	.welcome-panel .welcome-panel-column li {
+		display: inline-block;
+		margin-right: 13px;
+	}
+
+	.welcome-panel .welcome-panel-column ul {
+		margin: 0.4em 0 0;
+	}
+}
+
+/**
+ * HiDPI Displays
+ */
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+
+	.welcome-panel .welcome-panel-close:before {
+		background-image: url('../images/xit-2x.gif');
+		background-size: 20px auto;
+	}
+}
 
 /*------------------------------------------------------------------------------
   10.0 - List Posts (/Pages/etc)
@@ -2374,7 +2411,7 @@ table.fixed {
 	border-bottom: 0 none;
 }
 
-#commentsdiv img.waiting {
+#commentsdiv .spinner {
 	padding-left: 5px;
 }
 
@@ -2814,6 +2851,16 @@ table .inline-edit-row fieldset ul.cat-hover {
   11.0 - Write/Edit Post Screen
 ------------------------------------------------------------------------------*/
 
+#show-comments {
+	overflow: hidden;
+}
+
+#save-action .spinner,
+#show-comments a,
+#show-comments .spinner {
+	float: left;
+}
+
 #titlediv {
 	position: relative;
 	margin-bottom: 10px;
@@ -2846,6 +2893,12 @@ table .inline-edit-row fieldset ul.cat-hover {
 	position: absolute;
 	font-size: 1.7em;
 	padding: 8px 10px;
+}
+
+#wp-fullscreen-save .fs-saved {
+	color: #999;
+	float: right;
+	margin-top: 4px;
 }
 
 #wp-fullscreen-title-prompt-text {
@@ -2896,10 +2949,6 @@ input#link_url {
 #submitpost #ajax-loading,
 #submitpost .ajax-loading {
 	vertical-align: middle;
-}
-
-#wpcontent .ajax-loading {
-	visibility: hidden;
 }
 
 .submitbox .submit {
@@ -3107,13 +3156,30 @@ td.plugin-title p {
 	background: transparent url(../images/resize.gif) no-repeat scroll right bottom;
 	width: 12px;
 	cursor: se-resize;
-	margin: 0 2px;
+	margin: 0 1px;
 	position: relative;
 	top: -2px;
 }
 
 #post-body .postarea .wp_themeSkin .mceStatusbar a.mceResize {
 	top: 20px;
+}
+
+#content-resize-handle {
+	background: transparent url(../images/resize.gif) no-repeat scroll right bottom;
+	width: 12px;
+	cursor: se-resize;
+	position: absolute;
+	right: 2px;
+	height: 19px;
+}
+
+.press-this #content-resize-handle {
+	bottom: 2px;
+}
+
+.tmce-active #content-resize-handle {
+	display: none;
 }
 
 #wp-word-count {
@@ -3143,8 +3209,8 @@ td.plugin-title p {
 
 .curtime #timestamp {
 	background-repeat: no-repeat;
-	background-position: left top;
-	padding-left: 18px;
+	background-position: left center;
+	padding: 2px 0 1px 20px;
 }
 
 #timestampdiv {
@@ -3226,7 +3292,7 @@ td.plugin-title p {
 	width: auto;
 }
 
-#postcustomstuff #newmetaleft a {	
+#postcustomstuff #newmetaleft a {
 	display: inline-block;
 	margin: 0 8px 8px;
 	text-decoration: none;
@@ -3958,7 +4024,8 @@ td.imgedit-settings input {
 .imgedit-wait {
 	position: absolute;
 	top: 0;
-	background: #FFFFFF url(../images/wpspin_light.gif) no-repeat scroll 22px 10px;
+	background: #fff url(../images/wpspin_light.gif) no-repeat scroll 22px 10px;
+	background-size: 16px 16px;
 	opacity: 0.7;
 	filter: alpha(opacity=70);
 	width: 100%;
@@ -3966,15 +4033,47 @@ td.imgedit-settings input {
 	display: none;
 }
 
+.spinner {
+	background: url(../images/wpspin_light.gif) no-repeat;
+	background-size: 16px 16px;
+	display: none;
+	float: right;
+	opacity: 0.7;
+	filter: alpha(opacity=70);
+	width: 16px;
+	height: 16px;
+	margin: 5px 5px 0;
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+	.spinner,
+	.imgedit-wait,
+	.customize-loading #customize-container {
+		background-image: url(../images/wpspin_light-2x.gif);
+	}
+}
+
+.no-float {
+	float: none;
+}
+
 .media-disabled,
 .imgedit-settings .disabled  {
 	color: grey;
 }
 
-.imgedit-wait-spin {
+.wp_attachment_image, .A1B1 {
+	overflow: hidden;
+}
+
+.wp_attachment_image .button, .A1B1 .button {
+	float: left;
+}
+
+.wp_attachment_image .spinner, .A1B1 .spinner {
+	float: left;
 	padding: 0 4px 4px;
 	vertical-align: bottom;
-	visibility: hidden;
 }
 
 .imgedit-menu {
@@ -4148,6 +4247,9 @@ span.imgedit-scale-warn {
 	padding: 2px 10px;
 }
 
+/**
+ * HiDPI Displays
+ */
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 	.imgedit-crop,
 	.imgedit-rleft,
@@ -4260,8 +4362,8 @@ span.imgedit-scale-warn {
 	text-align: center;
 }
 
-#replysubmit img.waiting,
-.inline-edit-save img.waiting {
+#replysubmit .spinner,
+.inline-edit-save .spinner {
 	padding: 4px 10px 0;
 	vertical-align: top;
 	float: right;
@@ -4307,6 +4409,10 @@ span.imgedit-scale-warn {
 	height: 120px;
 	-webkit-box-shadow: none;
 	box-shadow: none;
+}
+
+.comment-php .wp-editor-area {
+	height: 200px;
 }
 
 .comment-ays {
@@ -4882,6 +4988,10 @@ h2 .nav-tab {
 	vertical-align: middle;
 }
 
+.options-general-php .spinner {
+	float: none;
+	margin: -3px 3px;
+}
 
 /*------------------------------------------------------------------------------
   21.0 - Admin Footer
@@ -5404,6 +5514,18 @@ body.full-overlay-active {
 	transition-duration:         0.2s;
 }
 
+/**
+ * HiDPI Displays
+ */
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+
+	.wp-full-overlay .collapse-sidebar-arrow {
+	 	background-image: url('../images/arrows-2x.png');
+	 	background-size: 15px 123px;
+	 }
+}
+
+
 /*------------------------------------------------------------------------------
   24.0 - Customize Loader
 ------------------------------------------------------------------------------*/
@@ -5436,6 +5558,7 @@ body.full-overlay-active {
 
 .customize-loading #customize-container {
 	background: #fff url("../images/wpspin_light.gif") no-repeat fixed center center;
+	background-size: 16px 16px;
 }
 
 #customize-container iframe,
@@ -5740,12 +5863,6 @@ td.media-icon img {
 	max-height: 60px;
 }
 
-.list-ajax-loading {
-	float: right;
-	margin-right: 9px;
-	margin-top: -1px;
-}
-
 .tablenav .list-ajax-loading {
 	margin-top: 7px;
 }
@@ -5961,7 +6078,7 @@ h3:hover .edit-box {
 	color: red;
 }
 
-#dashboard_right_now .waiting {
+#dashboard_right_now .spinner {
 	color: #e66f00;
 }
 
@@ -6099,7 +6216,7 @@ h3:hover .edit-box {
 }
 
 #dashboard_quick_press .wp-media-buttons {
-	margin: 0 0 .2em 8px;
+	margin: 0 0 .2em 1px;
 	padding: 0;
 }
 
@@ -6119,7 +6236,7 @@ h3:hover .edit-box {
 	float: right;
 }
 
-#dashboard-widgets #dashboard_quick_press form p.submit img.waiting {
+#dashboard-widgets #dashboard_quick_press form p.submit .spinner {
 	vertical-align: middle;
 	visibility: hidden;
 	margin: 4px 6px 0 0;
@@ -6680,6 +6797,10 @@ a.rsswidget {
 	margin-top: 5px;
 }
 
+.button.right, .button-secondary.right, .button-primary.right {
+	float: right;
+}
+
 /* Button Secondary Actions */
 .list-controls {
 	float: left;
@@ -6690,7 +6811,7 @@ a.rsswidget {
 	float: right;
 }
 
-.postbox img.waiting {
+.postbox .spinner {
 	display: none;
 	vertical-align: middle;
 }
@@ -7320,6 +7441,7 @@ img {
 /* Editor/Main Column */
 .press-this #poststuff {
 	margin: 0 10px 10px;
+	padding: 0;
 }
 
 #poststuff #editor-toolbar {
@@ -7415,7 +7537,7 @@ h3.tb {
 }
 
 .press-this #extra-fields .actions {
-	margin: -25px -7px 0 0;
+	margin: -32px -7px 0 0;
 }
 
 .press-this .actions li {
@@ -7449,6 +7571,16 @@ h3.tb {
 
 #waiting {
 	margin-top: 10px;
+	overflow: hidden;
+}
+
+#waiting span {
+	float: right;
+	margin: 0 0 0 5px;
+}
+
+#waiting .spinner {
+	display: block;
 }
 
 #extra-fields .postbox {
@@ -7515,7 +7647,7 @@ h3.tb {
 	margin: 5px 0;
 	padding: 0 5px;
 	border: 0 none;
-	height: 357px;
+	height: 345px;
 	font-family: Consolas, Monaco, monospace;
 	font-size: 13px;
 	line-height: 19px;
@@ -7523,7 +7655,7 @@ h3.tb {
 }
 
 /* Submit */
-#saving {
+.press-this #publishing-actions .spinner {
 	display: inline;
 	vertical-align: middle;
 }
@@ -7968,6 +8100,11 @@ a.widget-control-edit {
 	padding-top: 2px;
 }
 
+.sidebar-name .spinner {
+	float: none;
+	margin: 0 3px -3px;
+}
+
 .sidebar-name-arrow {
 	float: right;
 	height: 29px;
@@ -8099,6 +8236,29 @@ a.widget-control-edit {
 	}
 }
 
+/**
+ * HiDPI Displays
+ */
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+
+	.press-this .tagchecklist span a {
+	 	background-image: url('../images/xit-2x.gif');
+	 	background-size: 20px auto;
+	 }
+
+	.postbox:hover .handlediv,
+	.stuffbox:hover .handlediv,
+	.widget-top a.widget-action {
+	 	background-image: url('../images/arrows-2x.png');
+	 	background-size: 15px 123px;
+	 }
+
+	.widget-top a.widget-action:hover {
+	 	background-image: url('../images/arrows-dark-2x.png');
+	 	background-size: 15px 123px;
+	 }
+}
+
 /* =Localized CSS
 -------------------------------------------------------------- */
 
@@ -8156,4 +8316,9 @@ a.widget-control-edit {
 }
 .locale-lt-lt .inline-edit-row fieldset label span.input-text-wrap {
 	margin-left: 8em;
+}
+
+.update-php .spinner {
+	float: none;
+	margin: -4px 0;
 }

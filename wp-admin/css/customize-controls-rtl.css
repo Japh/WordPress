@@ -10,7 +10,7 @@
 	float: left;
 }
 
-#customize-header-actions img {
+#customize-header-actions .spinner {
 	float: left;
 	margin-right: 0;
 	margin-left: 4px;
@@ -65,8 +65,7 @@
 	margin-left: 5px;
 }
 
-.customize-section input[type="text"].color-picker-hex,
-.customize-control-color .farbtastic-placeholder {
+.customize-section input[type="text"].color-picker-hex {
 	float: right;
 }
 

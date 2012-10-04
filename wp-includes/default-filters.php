@@ -257,6 +257,7 @@ add_action( 'wp_scheduled_auto_draft_delete', 'wp_delete_auto_drafts'           
 add_action( 'admin_init',                 'send_frame_options_header',               10, 0 );
 add_action( 'importer_scheduled_cleanup', 'wp_delete_attachment'                           );
 add_action( 'upgrader_scheduled_cleanup', 'wp_delete_attachment'                           );
+add_action( 'welcome_panel',              'wp_welcome_panel'                               );
 
 // Navigation menu actions
 add_action( 'delete_post',                '_wp_delete_post_menu_item'         );
@@ -284,7 +285,7 @@ add_action( 'admin_color_scheme_picker', 'admin_color_scheme_picker' );
 // If the upgrade hasn't run yet, assume link manager is used.
 add_filter( 'default_option_link_manager_enabled', '__return_true' );
 
-// Automatically embed URLs
-add_filter( 'default_option_autoembed_urls', '__return_true' );
+// This option no longer exists; tell plugins we always support auto-embedding.
+add_filter( 'default_option_embed_autourls', '__return_true' );
 
 unset($filter, $action);

@@ -214,8 +214,7 @@ function wp_stream_image( $image, $mime_type, $post_id ) {
 			return false;
 
 		return true;
-
-    } else {
+	} else {
 		_deprecated_argument( __FUNCTION__, '3.5', __( '$image needs to be an WP_Image_Editor object' ) );
 
 		$image = apply_filters('image_save_pre', $image, $post_id);

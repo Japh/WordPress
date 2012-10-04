@@ -98,7 +98,7 @@ function twentytwelve_scripts_styles() {
 	/*
 	 * Adds JavaScript for handling the navigation menu hide-and-show behavior.
 	 */
-	wp_enqueue_script( 'twentytwelve-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20120920', true );
+	wp_enqueue_script( 'twentytwelve-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '1.0', true );
 
 	/*
 	 * Loads our special font CSS file.
@@ -112,26 +112,35 @@ function twentytwelve_scripts_styles() {
 	 * }
 	 * add_action( 'wp_enqueue_scripts', 'mytheme_dequeue_fonts', 11 );
 	 */
-	/* translators: If there are characters in your language that are not supported by Open Sans,
-	   enter 'disable-open-sans'. Otherwise enter 'enable-open-sans'. Do not translate into your own language. */
-	if ( false === strpos( _x( 'enable-open-sans', 'Open Sans font: enable or disable', 'twentytwelve' ), 'disable' ) ) {
+
+	/* translators: If there are characters in your language that are not supported
+	   by Open Sans, translate this to 'off'. Do not translate into your own language. */
+	if ( 'off' !== _x( 'on', 'Open Sans font: on or off', 'twentytwelve' ) ) {
+		$subsets = 'latin,latin-ext';
+
+		/* translators: To add an additional Open Sans character subset specific to your language, translate
+		   this to 'greek', 'cyrillic' or 'vietnamese'. Do not translate into your own language. */
+		$subset = _x( 'no-subset', 'Open Sans font: add new subset (greek, cyrillic, vietnamese)', 'twentytwelve' );
+
+		if ( 'cyrillic' == $subset )
+			$subsets .= ',cyrillic,cyrillic-ext';
+		elseif ( 'greek' == $subset )
+			$subsets .= ',greek,greek-ext';
+		elseif ( 'vietnamese' == $subset )
+			$subsets .= ',vietnamese';
+
 		$protocol = is_ssl() ? 'https' : 'http';
-		wp_enqueue_style( 'twentytwelve-fonts', "$protocol://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700", array(), null );
+		$query_args = array(
+			'family' => 'Open+Sans:400italic,700italic,400,700',
+			'subset' => $subsets,
+		);
+		wp_enqueue_style( 'twentytwelve-fonts', add_query_arg( $query_args, "$protocol://fonts.googleapis.com/css" ), array(), null );
 	}
 
 	/*
 	 * Loads our main stylesheet.
 	 */
 	wp_enqueue_style( 'twentytwelve-style', get_stylesheet_uri() );
-
-	/*
-	 * Loads HTML5 JavaScript file to add support for HTML5 elements in older IE versions.
-	 * Ideally, should load after main CSS file.
-	 * See html5.js link in header.php.
-	 *
-	 * @todo depends on IE dependency being in core for JS enqueuing
-	 * before we can move here properly: see http://core.trac.wordpress.org/ticket/16024
-	 */
 }
 add_action( 'wp_enqueue_scripts', 'twentytwelve_scripts_styles' );
 

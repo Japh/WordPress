@@ -121,6 +121,45 @@ if ( typeof wp === 'undefined' )
 					deferred.rejectWith( this, arguments );
 				});
 			}).promise();
+		},
+
+		// Scales a set of dimensions to fit within bounding dimensions.
+		fit: function( dimensions ) {
+			var width     = dimensions.width,
+				height    = dimensions.height,
+				maxWidth  = dimensions.maxWidth,
+				maxHeight = dimensions.maxHeight,
+				constraint;
+
+			// Compare ratios between the two values to determine which
+			// max to constrain by. If a max value doesn't exist, then the
+			// opposite side is the constraint.
+			if ( ! _.isUndefined( maxWidth ) && ! _.isUndefined( maxHeight ) ) {
+				constraint = ( width / height > maxWidth / maxHeight ) ? 'width' : 'height';
+			} else if ( _.isUndefined( maxHeight ) ) {
+				constraint = 'width';
+			} else if (  _.isUndefined( maxWidth ) && height > maxHeight ) {
+				constraint = 'height';
+			}
+
+			// If the value of the constrained side is larger than the max,
+			// then scale the values. Otherwise return the originals; they fit.
+			if ( 'width' === constraint && width > maxWidth ) {
+				return {
+					width : maxWidth,
+					height: maxWidth * height / width
+				};
+			} else if ( 'height' === constraint && height > maxHeight ) {
+				return {
+					width : maxHeight * width / height,
+					height: maxHeight
+				};
+			} else {
+				return {
+					width : width,
+					height: height
+				};
+			}
 		}
 	});
 
@@ -185,6 +224,7 @@ if ( typeof wp === 'undefined' )
 			this.props.on( 'change:orderby', this._changeOrderby, this );
 			this.props.on( 'change:query',   this._changeQuery,   this );
 			this.props.on( 'change:search',  this._changeSearch,  this );
+			this.props.on( 'change:type',    this._changeType,    this );
 
 			// Set the `props` model and fill the default property values.
 			this.props.set( _.defaults( options.props || {}, {
@@ -225,15 +265,15 @@ if ( typeof wp === 'undefined' )
 			}
 		},
 
-		_changeSearch: function( model, term ) {
+		_changeFilteredProp: function( prop, model, term ) {
 			// Bail if we're currently searching for the same term.
-			if ( this.props.get('search') === term )
+			if ( this.props.get( prop ) === term )
 				return;
 
-			if ( term && ! this.filters.search )
-				this.filters.search = Attachments.filters.search;
-			else if ( ! term && this.filters.search === Attachments.filters.search )
-				delete this.filters.search;
+			if ( term && ! this.filters[ prop ] )
+				this.filters[ prop ] = Attachments.filters[ prop ];
+			else if ( ! term && this.filters[ prop ] === Attachments.filters[ prop ] )
+				delete this.filters[ prop ];
 
 			// If no `Attachments` model is provided to source the searches
 			// from, then automatically generate a source from the existing
@@ -242,6 +282,14 @@ if ( typeof wp === 'undefined' )
 				this.props.set( 'source', new Attachments( this.models ) );
 
 			this.reset( this.props.get('source').filter( this.validator ) );
+		},
+
+		_changeSearch: function( model, term ) {
+			return this._changeFilteredProp( 'search', model, term );
+		},
+
+		_changeType: function( model, term ) {
+			return this._changeFilteredProp( 'type', model, term );
 		},
 
 		validator: function( attachment ) {
@@ -334,13 +382,21 @@ if ( typeof wp === 'undefined' )
 			// Note that this client-side searching is *not* equivalent
 			// to our server-side searching.
 			search: function( attachment ) {
-				if ( ! this.searching )
+				if ( ! this.props.get('search') )
 					return true;
 
 				return _.any(['title','filename','description','caption','name'], function( key ) {
 					var value = attachment.get( key );
-					return value && -1 !== value.search( this.searching );
+					return value && -1 !== value.search( this.props.get('search') );
 				}, this );
+			},
+
+			type: function( attachment ) {
+				var type = this.props.get('type');
+				if ( ! type )
+					return true;
+
+				return -1 !== type.indexOf( attachment.get('type') );
 			}
 		}
 	});
@@ -458,7 +514,8 @@ if ( typeof wp === 'undefined' )
 		},
 
 		propmap: {
-			'search': 's'
+			'search': 's',
+			'type':   'post_mime_type'
 		},
 
 		// Caches query objects so queries can be easily reused.

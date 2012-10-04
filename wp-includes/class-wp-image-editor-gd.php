@@ -1,5 +1,19 @@
 <?php
+/**
+ * WordPress GD Image Editor
+ *
+ * @package WordPress
+ * @subpackage Image_Editor
+ */
 
+/**
+ * WordPress Image Editor Class for Image Manipulation through GD
+ *
+ * @since 3.5.0
+ * @package WordPress
+ * @subpackage Image_Editor
+ * @uses WP_Image_Editor Extends class
+ */
 class WP_Image_Editor_GD extends WP_Image_Editor {
 	protected $image = false; // GD Resource
 
@@ -11,9 +25,9 @@ class WP_Image_Editor_GD extends WP_Image_Editor {
 	}
 
 	/**
-	 * Checks to see if GD is available.
+	 * Checks to see if current environment supports GD
 	 *
-	 * @since 3.5
+	 * @since 3.5.0
 	 * @access protected
 	 *
 	 * @return boolean
@@ -26,7 +40,7 @@ class WP_Image_Editor_GD extends WP_Image_Editor {
 	}
 
 	/**
-	 * Loads image from $this->file into GD Resource
+	 * Loads image from $this->file into new GD Resource
 	 *
 	 * @since 3.5
 	 * @access protected
@@ -37,7 +51,7 @@ class WP_Image_Editor_GD extends WP_Image_Editor {
 		if ( $this->image )
 			return true;
 
-		if ( ! file_exists( $this->file ) )
+		if ( ! is_file( $this->file ) )
 			return new WP_Error( 'error_loading_image', __('File doesn&#8217;t exist?'), $this->file );
 
 		// Set artificially high because GD uses uncompressed images in memory
@@ -168,11 +182,18 @@ class WP_Image_Editor_GD extends WP_Image_Editor {
 	/**
 	 * Crops Image.
 	 *
-	 * @param float $x
-	 * @param float $y
-	 * @param float $w
-	 * @param float $h
-	 * @return boolean
+	 * @since 3.5.0
+	 * @access public
+	 *
+	 * @param string|int $src The source file or Attachment ID.
+	 * @param int $src_x The start x position to crop from.
+	 * @param int $src_y The start y position to crop from.
+	 * @param int $src_w The width to crop.
+	 * @param int $src_h The height to crop.
+	 * @param int $dst_w Optional. The destination width.
+	 * @param int $dst_h Optional. The destination height.
+	 * @param int $src_abs Optional. If the source crop points are absolute.
+	 * @return boolean|WP_Error
 	 */
 	public function crop( $src_x, $src_y, $src_w, $src_h, $dst_w = null, $dst_h = null, $src_abs = false ) {
 		// If destination width/height isn't specified, use same as

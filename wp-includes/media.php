@@ -1120,6 +1120,56 @@ function wp_embed_handler_googlevideo( $matches, $attr, $url, $rawattr ) {
 }
 
 /**
+ * {@internal Missing Short Description}}
+ *
+ * @since 2.3.0
+ *
+ * @param unknown_type $size
+ * @return unknown
+ */
+function wp_convert_hr_to_bytes( $size ) {
+	$size  = strtolower( $size );
+	$bytes = (int) $size;
+	if ( strpos( $size, 'k' ) !== false )
+		$bytes = intval( $size ) * 1024;
+	elseif ( strpos( $size, 'm' ) !== false )
+		$bytes = intval($size) * 1024 * 1024;
+	elseif ( strpos( $size, 'g' ) !== false )
+		$bytes = intval( $size ) * 1024 * 1024 * 1024;
+	return $bytes;
+}
+
+/**
+ * {@internal Missing Short Description}}
+ *
+ * @since 2.3.0
+ *
+ * @param unknown_type $bytes
+ * @return unknown
+ */
+function wp_convert_bytes_to_hr( $bytes ) {
+	$units = array( 0 => 'B', 1 => 'kB', 2 => 'MB', 3 => 'GB' );
+	$log   = log( $bytes, 1024 );
+	$power = (int) $log;
+	$size  = pow( 1024, $log - $power );
+	return $size . $units[$power];
+}
+
+/**
+ * {@internal Missing Short Description}}
+ *
+ * @since 2.5.0
+ *
+ * @return unknown
+ */
+function wp_max_upload_size() {
+	$u_bytes = wp_convert_hr_to_bytes( ini_get( 'upload_max_filesize' ) );
+	$p_bytes = wp_convert_hr_to_bytes( ini_get( 'post_max_size' ) );
+	$bytes   = apply_filters( 'upload_size_limit', min( $u_bytes, $p_bytes ), $u_bytes, $p_bytes );
+	return $bytes;
+}
+
+/**
  * Prints default plupload arguments.
  *
  * @since 3.4.0
@@ -1170,7 +1220,6 @@ function wp_plupload_default_settings() {
 }
 add_action( 'customize_controls_enqueue_scripts', 'wp_plupload_default_settings' );
 
-
 /**
  * Prepares an attachment post object for JS, where it is expected
  * to be JSON-encoded and fit into an Attachment model.
@@ -1209,7 +1258,7 @@ function wp_prepare_attachment_for_js( $attachment ) {
 		'mime'        => $attachment->post_mime_type,
 		'type'        => $type,
 		'subtype'     => $subtype,
-		'icon'        => wp_mime_type_icon( $attachment->post_mime_type ),
+		'icon'        => wp_mime_type_icon( $attachment->ID ),
 	);
 
 	if ( $meta && 'image' === $type ) {
@@ -1288,7 +1337,14 @@ function wp_print_media_templates( $attachment ) {
 			<% if ( uploading ) { %>
 				<div class="media-progress-bar"><div></div></div>
 			<% } %>
-			<div class="actions"></div>
+
+			<% if ( buttons.close ) { %>
+				<a class="close" href="#">&times;</a>
+			<% } %>
+
+			<% if ( buttons.insert ) { %>
+				<a class="insert button button-primary button-small" href="#"><?php _e( 'Insert' ); ?></a>
+			<% } %>
 		</div>
 		<div class="describe"></div>
 	</script>
@@ -1302,6 +1358,18 @@ function wp_print_media_templates( $attachment ) {
 			<span class="count"><%- count %></span>
 		</div>
 		<a class="clear-selection" href="#"><?php _e('Clear selection'); ?></a>
+	</script>
+
+	<script type="text/html" id="tmpl-editor-attachment">
+		<% if ( url ) { %>
+			<img src="<%- url %>" width="<%- width %>" height="<%- height %>" draggable="false" />
+		<% } %>
+
+		<% if ( uploading ) { %>
+			<div class="media-progress-bar"><div></div></div>
+		<% } %>
+		<div class="close">&times;</div>
+		<div class="describe"></div>
 	</script>
 	<?php
 }

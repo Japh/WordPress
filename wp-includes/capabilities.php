@@ -1046,6 +1046,14 @@ function map_meta_cap( $cap, $user_id ) {
 				$caps[] = $post_type->cap->delete_private_posts;
 		}
 		break;
+	// current_user_can( 'create_posts', $post_type )
+	case 'create_posts':
+		$post_type = isset( $args[0] ) ? $args[0] : 'post';
+		$post_type_object = get_post_type_object( $post_type );
+
+		$caps[] = $post_type_object->cap->create_posts;
+
+		break;
 		// edit_post breaks down to edit_posts, edit_published_posts, or
 		// edit_others_posts
 	case 'edit_post':
@@ -1134,6 +1142,12 @@ function map_meta_cap( $cap, $user_id ) {
 			$caps[] = $post_type->cap->read_private_posts;
 		else
 			$caps = map_meta_cap( 'edit_post', $user_id, $post->ID );
+		break;
+	case 'publish_post':
+		$post = get_post( $args[0] );
+		$post_type = get_post_type_object( $post->post_type );
+
+		$caps[] = $post_type->cap->publish_posts;
 		break;
 	case 'edit_post_meta':
 	case 'delete_post_meta':

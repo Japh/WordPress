@@ -1,5 +1,16 @@
 <?php
+/**
+ * Base WordPress Image Editor
+ *
+ * @package WordPress
+ * @subpackage Image_Editor
+ */
 
+/**
+ * Base WordPress Image Editor class for which Editor implementations extend
+ *
+ * @since 3.5.0
+ */
 abstract class WP_Image_Editor {
 	protected $file = null;
 	protected $size = null;
@@ -169,11 +180,14 @@ abstract class WP_Image_Editor {
 		}
 
 		if ( $filename ) {
+			$ext = '';
 			$info = pathinfo( $filename );
 			$dir  = $info['dirname'];
-			$ext  = $info['extension'];
 
-			$filename = $dir.DIRECTORY_SEPARATOR.wp_basename( $filename, ".$ext" ).".{$new_ext}";
+			if( isset( $info['extension'] ) )
+				$ext = $info['extension'];
+
+			$filename = trailingslashit( $dir ) . wp_basename( $filename, ".$ext" ) . ".{$new_ext}";
 		}
 
 		return array( $filename, $new_ext, $mime_type );
@@ -205,7 +219,7 @@ abstract class WP_Image_Editor {
 		if ( ! is_null( $dest_path ) && $_dest_path = realpath( $dest_path ) )
 			$dir = $_dest_path;
 
-		return $dir.DIRECTORY_SEPARATOR."{$name}-{$suffix}.{$new_ext}";
+		return trailingslashit( $dir ) . "{$name}-{$suffix}.{$new_ext}";
 	}
 
 	/**

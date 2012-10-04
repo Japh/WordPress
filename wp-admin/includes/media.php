@@ -377,9 +377,16 @@ document.body.className = document.body.className.replace('no-js', 'js');
  * @param string $editor_id
  */
 function media_buttons($editor_id = 'content') {
+	wp_enqueue_script( 'media-upload' );
+	wp_enqueue_style( 'media-views' );
+	wp_plupload_default_settings();
+	add_action( 'admin_footer', 'wp_print_media_templates' );
+
 	$context = apply_filters('media_buttons_context', __('Upload/Insert %s'));
 
-	$img = '<img src="' . esc_url( admin_url( 'images/media-button.png?ver=20111005' ) ) . '" width="16" height="16" />';
+	$img = '<span class="wp-media-buttons-icon"></span>';
+
+	echo '<a href="#" class="button insert-media add_media" data-editor="' . esc_attr( $editor_id ) . '" title="' . esc_attr__( 'Add Media' ) . '">' . $img . ' Beta Media</a>';
 
 	echo '<a href="' . esc_url( get_upload_iframe_src() ) . '" class="thickbox add_media" id="' . esc_attr( $editor_id ) . '-add_media" title="' . esc_attr__( 'Add Media' ) . '" onclick="return false;">' . sprintf( $context, $img ) . '</a>';
 }
@@ -1112,7 +1119,7 @@ function get_media_item( $attachment_id, $args = null ) {
 	$image_edit_button = '';
 	if ( gd_edit_image_support( $post->post_mime_type ) ) {
 		$nonce = wp_create_nonce( "image_editor-$post->ID" );
-		$image_edit_button = "<input type='button' id='imgedit-open-btn-$post->ID' onclick='imageEdit.open( $post->ID, \"$nonce\" )' class='button' value='" . esc_attr__( 'Edit Image' ) . "' /> <img src='" . esc_url( admin_url( 'images/wpspin_light.gif' ) ) . "' class='imgedit-wait-spin' alt='' />";
+		$image_edit_button = "<input type='button' id='imgedit-open-btn-$post->ID' onclick='imageEdit.open( $post->ID, \"$nonce\" )' class='button' value='" . esc_attr__( 'Edit Image' ) . "' /> <span class='spinner'></span>";
 	}
 
 	$attachment_url = get_permalink( $attachment_id );
@@ -1580,7 +1587,7 @@ var addExtImage = {
 			return false;
 		}
 
-		document.getElementById('status_img').innerHTML = '<img src="<?php echo esc_url( admin_url( 'images/wpspin_light.gif' ) ); ?>" alt="" />';
+		document.getElementById('status_img').innerHTML = '<img src="<?php echo esc_url( admin_url( 'images/wpspin_light.gif' ) ); ?>" alt="" width="16" />';
 		t.preloadImg = new Image();
 		t.preloadImg.onload = t.updateImageData;
 		t.preloadImg.onerror = t.resetImageData;
@@ -2126,7 +2133,7 @@ function edit_form_image_editor() {
 	$image_edit_button = '';
 	if ( gd_edit_image_support( $post->post_mime_type ) ) {
 		$nonce = wp_create_nonce( "image_editor-$post->ID" );
-		$image_edit_button = "<input type='button' id='imgedit-open-btn-$post->ID' onclick='imageEdit.open( $post->ID, \"$nonce\" )' class='button' value='" . esc_attr__( 'Edit Image' ) . "' /> <img src='" . esc_url( admin_url( 'images/wpspin_light.gif' ) ) . "' class='imgedit-wait-spin' alt='' />";
+		$image_edit_button = "<input type='button' id='imgedit-open-btn-$post->ID' onclick='imageEdit.open( $post->ID, \"$nonce\" )' class='button' value='" . esc_attr__( 'Edit Image' ) . "' /> <span class='spinner'></span>";
 	}
 
  	?>
@@ -2134,7 +2141,7 @@ function edit_form_image_editor() {
 		<div class="imgedit-response" id="imgedit-response-<?php echo $attachment_id; ?>"></div>
 
 		<div class="wp_attachment_image" id="media-head-<?php echo $attachment_id; ?>">
-			<p><img class="thumbnail" src="<?php echo $thumb_url[0]; ?>" style="max-width:100%" width="<?php echo $thumb_url[1]; ?>" alt="" /></p>
+			<p><img class="thumbnail" src="<?php echo set_url_scheme( $thumb_url[0] ); ?>" style="max-width:100%" width="<?php echo $thumb_url[1]; ?>" alt="" /></p>
 			<p><?php echo $image_edit_button; ?></p>
 		</div>
 		<div style="display:none" class="image-editor" id="image-editor-<?php echo $attachment_id; ?>"></div>

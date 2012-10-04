@@ -82,6 +82,8 @@ class wp_xmlrpc_server extends IXR_Server {
 			'wp.getPostFormats'     => 'this:wp_getPostFormats',
 			'wp.getPostType'		=> 'this:wp_getPostType',
 			'wp.getPostTypes'		=> 'this:wp_getPostTypes',
+			'wp.getRevisions'		=> 'this:wp_getRevisions',
+			'wp.restoreRevision'	=> 'this:wp_restoreRevision',
 
 			// Blogger API
 			'blogger.getUsersBlogs' => 'this:blogger_getUsersBlogs',
@@ -1258,6 +1260,13 @@ class wp_xmlrpc_server extends IXR_Server {
 		if ( empty( $post['ID'] ) )
 			return new IXR_Error( 404, __( 'Invalid post ID.' ) );
 
+		if ( isset( $content_struct['if_not_modified_since'] ) ) {
+			// If the post has been modified since the date provided, return an error.
+			if ( mysql2date( 'U', $post['post_modified_gmt'] ) > $content_struct['if_not_modified_since']->getTimestamp() ) {
+				return new IXR_Error( 409, __( 'There is a revision of this post that is more recent.' ) );
+			}
+		}
+
 		// convert the date field back to IXR form
 		$post['post_date'] = $this->_convert_date( $post['post_date'] );
 
@@ -1475,7 +1484,7 @@ class wp_xmlrpc_server extends IXR_Server {
 			if ( isset( $filter['order'] ) )
 				$query['order'] = $filter['order'];
 		}
-		
+
 		if ( isset( $filter['s'] ) ) {
 			$query['s'] = $filter['s'];
 		}
@@ -3480,6 +3489,128 @@ class wp_xmlrpc_server extends IXR_Server {
 		}
 
 		return $struct;
+	}
+
+	/**
+	 * Retrieve revisions for a specific post.
+	 *
+	 * @since 3.5.0
+	 *
+	 * The optional $fields parameter specifies what fields will be included
+	 * in the response array.
+	 *
+	 * @uses wp_get_post_revisions()
+	 * @see wp_getPost() for more on $fields
+	 *
+	 * @param array $args Method parameters. Contains:
+	 *  - int     $blog_id
+	 *  - string  $username
+	 *  - string  $password
+	 *  - int     $post_id
+	 *  - array   $fields
+	 * @return array contains a collection of posts.
+	 */
+	function wp_getRevisions( $args ) {
+		if ( ! $this->minimum_args( $args, 4 ) )
+			return $this->error;
+
+		$this->escape( $args );
+
+		$blog_id    = (int) $args[0];
+		$username   = $args[1];
+		$password   = $args[2];
+		$post_id    = (int) $args[3];
+
+		if ( isset( $args[4] ) )
+			$fields = $args[4];
+		else
+			$fields = apply_filters( 'xmlrpc_default_revision_fields', array( 'post_date', 'post_date_gmt' ), 'wp.getRevisions' );
+
+		if ( ! $user = $this->login( $username, $password ) )
+			return $this->error;
+
+		do_action( 'xmlrpc_call', 'wp.getRevisions' );
+
+		if ( ! $post = get_post( $post_id ) )
+			return new IXR_Error( 404, __( 'Invalid post ID' ) );
+
+		if ( ! current_user_can( 'edit_post', $post_id ) )
+			return new IXR_Error( 401, __( 'Sorry, you are not allowed to edit posts.' ) );
+
+		// Check if revisions are enabled.
+		if ( ! WP_POST_REVISIONS || ! post_type_supports( $post->post_type, 'revisions' ) )
+			return new IXR_Error( 401, __( 'Sorry, revisions are disabled.' ) );
+
+		$revisions = wp_get_post_revisions( $post_id );
+
+		if ( ! $revisions )
+			return array();
+
+		$struct = array();
+
+		foreach ( $revisions as $revision ) {
+			if ( ! current_user_can( 'read_post', $revision->ID ) )
+				continue;
+
+			// Skip autosaves
+			if ( wp_is_post_autosave( $revision ) )
+				continue;
+
+			$struct[] = $this->_prepare_post( get_object_vars( $revision ), $fields );
+		}
+
+		return $struct;
+	}
+
+	/**
+	 * Restore a post revision
+	 *
+	 * @since 3.5.0
+	 *
+	 * @uses wp_restore_post_revision()
+	 *
+	 * @param array $args Method parameters. Contains:
+	 *  - int     $blog_id
+	 *  - string  $username
+	 *  - string  $password
+	 *  - int     $post_id
+	 * @return bool false if there was an error restoring, true if success.
+	 */
+	function wp_restoreRevision( $args ) {
+		if ( ! $this->minimum_args( $args, 3 ) )
+			return $this->error;
+
+		$this->escape( $args );
+
+		$blog_id     = (int) $args[0];
+		$username    = $args[1];
+		$password    = $args[2];
+		$revision_id = (int) $args[3];
+
+		if ( ! $user = $this->login( $username, $password ) )
+			return $this->error;
+
+		do_action( 'xmlrpc_call', 'wp.restoreRevision' );
+
+		if ( ! $revision = wp_get_post_revision( $revision_id ) )
+			return new IXR_Error( 404, __( 'Invalid post ID' ) );
+
+		if ( wp_is_post_autosave( $revision ) )
+			return new IXR_Error( 404, __( 'Invalid post ID' ) );
+
+		if ( ! $post = get_post( $revision->post_parent ) )
+			return new IXR_Error( 404, __( 'Invalid post ID' ) );
+
+		if ( ! current_user_can( 'edit_post', $revision->post_parent ) )
+			return new IXR_Error( 401, __( 'Sorry, you cannot edit this post.' ) );
+
+		// Check if revisions are disabled.
+		if ( ! WP_POST_REVISIONS || ! post_type_supports( $post->post_type, 'revisions' ) )
+			return new IXR_Error( 401, __( 'Sorry, revisions are disabled.' ) );
+
+		$post = wp_restore_post_revision( $revision_id );
+
+		return (bool) $post;
 	}
 
 	/* Blogger API functions.
